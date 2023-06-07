@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.lucasmont.workshopmongo.domain.Post;
 import com.lucasmont.workshopmongo.domain.User;
 import com.lucasmont.workshopmongo.dto.UserDTO;
 import com.lucasmont.workshopmongo.services.UserService;
+import com.lucasmont.workshopmongo.services.exception.ObjectNotFoundException;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -34,6 +36,9 @@ public class UserResource {
     @RequestMapping(value="/{id}", method=RequestMethod.GET)
     public ResponseEntity<UserDTO> findById(@PathVariable String id){
         User obj = service.findById(id);
+        if(obj == null){
+            throw new ObjectNotFoundException("Objeto não encontrado");
+        }
         return ResponseEntity.ok().body(new UserDTO(obj));
     }
 
@@ -57,5 +62,11 @@ public class UserResource {
         obj.setId(id);
         service.update(obj);
         return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(value="/{id}/posts", method=RequestMethod.GET)
+    public ResponseEntity<List<Post>> findPosts(@PathVariable String id){
+        User obj = service.findById(id);
+        return ResponseEntity.ok().body(obj.getPosts());
     }
 }
